@@ -1,42 +1,93 @@
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:laihla_lyrics/json_helper.dart';
 import 'package:laihla_lyrics/pages/home.dart';
-import 'package:laihla_lyrics/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:laihla_lyrics/pages/offline_home.dart';
+import 'package:path_provider/path_provider.dart';
+List<dynamic> jsonData = [];
+List<dynamic> jsonDatas = [];
+List<dynamic> favorites = [];
+ var downloads ;
+//https://drive.google.com/file/d/14nduwHp9yLKADrtRW5JyQZRbWMtF11IE/view?usp=sharing
+ // const url = 'https://drive.google.com/uc?export=download&id=14nduwHp9yLKADrtRW5JyQZRbWMtF11IE';
+  const url = 'https://drive.google.com/uc?export=download&id=1hQoHs2dMjFJK3nEKyFcInPb3Q5AT242I';
 
 
-late Box   pathianHla;
-late Box   zunHla;
-late Box   chawnghlang;
-late Box   khrifaHlaBu;
-late Box  downloads;
+void addFavoriteData(dynamic favoriteData) async {
+  final dir = await getTemporaryDirectory();
 
 
-void main()async {
+
+  const fileName = 'favorite';
+  final filePath = '${dir.path}/$fileName';
+
+  List<dynamic> existingData = [];
+
+  try {
+    File file = File(filePath);
+    if (file.existsSync()) {
+      String fileContents = await file.readAsString();
+      existingData = jsonDecode(fileContents);
+    }
+  } catch (e) {}
+
+  existingData.add(favoriteData);
+
+  String updatedData = jsonEncode(existingData);
+  File file = File(filePath);
+  await file.writeAsString(updatedData);
+}
+
+void removeFavoriteData(dynamic favoriteData) async {
+  final dir = await getTemporaryDirectory();
+
+  const fileName = 'favorite';
+  final filePath = '${dir.path}/$fileName';
+
+  List<dynamic> existingData = [];
+
+  try {
+    File file = File(filePath);
+    if (file.existsSync()) {
+      String fileContents = await file.readAsString();
+      existingData = jsonDecode(fileContents);
+    }
+  } catch (e) {}
+
+  existingData.removeWhere((song) => song['title'] == favoriteData);
+
+  String updatedData = jsonEncode(existingData);
+  File file = File(filePath);
+  await file.writeAsString(updatedData);
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+await Firebase.initializeApp();
+await FirebaseApi().initNotifications();
+
+  MobileAds.instance.initialize();
 
   await Hive.initFlutter();
-  await Hive.openBox('pathianhla');
-  pathianHla = Hive.box('pathianhla');
-
-  await Hive.openBox('zunHla');
-  zunHla = Hive.box('zunhla');
-
-   await Hive.openBox('khrifaHlaBu');
-  khrifaHlaBu = Hive.box('khrifaHlaBu');
-
-  await Hive.openBox('changHlang');
-  chawnghlang = Hive.box('changHlang');
 
   await Hive.openBox('downloads');
   downloads = Hive.box('downloads');
 
-
-  runApp(const MyApp());
+  OrientationHelper()
+      .setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+    runApp(const MyApp());
+  });
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,10 +95,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return   const MaterialApp(
+    return  const  GetMaterialApp(
       title: 'laihla lyrics',
       debugShowCheckedModeBanner: false,
-
       home: LoadingPage(),
     );
   }
@@ -63,387 +113,250 @@ class LoadingPage extends StatefulWidget {
 class _LoadingPageState extends State<LoadingPage> {
 
 
-  pathianhlaData()async {
-    //1
-    var bol1 = await Services().fetchPathianhla1();
-    bol1.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
 
-          bool isContain = bol1.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
 
-      }});
-
-    //2
-    var bol2 = await Services().fetchPathianhla2();
-    bol2.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
-
-          bool isContain = bol2.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-
-      }});
-
-    //3
-    var bol3 = await Services().fetchPathianhla3();
-    bol3.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
-
-          bool isContain = bol3.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-
-      }});
-
-    //4
-    var bol4 = await Services().fetchPathianhla4();
-    bol4.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
-
-          bool isContain = bol4.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-
-      }});
-
-    //5
-    var bol5 = await Services().fetchPathianhla5();
-    bol5.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
-
-          bool isContain = bol5.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-
-      }});
-
-    //6
-    var bol6 = await Services().fetchPathianhla6();
-    bol6.forEach((e) {if(pathianHla.isNotEmpty){
-        for (var element in pathianHla.values) {
-
-          bool isContain = bol6.contains(element);
-          if(isContain){}else {
-            pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-          }
-        }
-      }else{
-        pathianHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-
-      }});
-  }
-
-  loadZunhla()async{
-
-    //1
-    var zunhla1 = await Services().fetchZunhla1();
-
-    zunhla1.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-          bool isContain = zunhla1.contains(element);
-          if(isContain){}else {
-            zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-          }
-        }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-    //2
-    var zunhla2 = await Services().fetchZunhla2();
-
-    zunhla2.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-        bool isContain = zunhla2.contains(element);
-        if(isContain){}else {
-          zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-        }
-      }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-    //3
-    var zunhla3 = await Services().fetchZunhla3();
-
-    zunhla3.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-        bool isContain = zunhla3.contains(element);
-        if(isContain){}else {
-          zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-        }
-      }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-    //4
-    var zunhla4 = await Services().fetchZunhla4();
-
-    zunhla4.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-        bool isContain = zunhla4.contains(element);
-        if(isContain){}else {
-          zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-        }
-      }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-    //5
-    var zunhla5 = await Services().fetchZunhla5();
-
-    zunhla5.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-        bool isContain = zunhla5.contains(element);
-        if(isContain){}else {
-          zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-        }
-      }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-    //6
-    var zunhla6 = await Services().fetchZunhla6();
-
-    zunhla6.forEach((e) {
-      if(zunHla.isNotEmpty){for (var element in zunHla.values) {
-
-        bool isContain = zunhla6.contains(element);
-        if(isContain){}else {
-          zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']) ;
-        }
-      }
-      }else{
-        zunHla.put(e['fields']['title']+e['fields']['singer'], e['fields']);
-      }});
-
-  }
-
-  chawngHlangFunction()async{
-    var chawnghlanginternet = await Services().fetchChawnghlang();
-
-    chawnghlanginternet.forEach((e) {
-      if(chawnghlang.isNotEmpty){
-        for (var element in chawnghlang.values) {
-
-          bool isContain = chawnghlanginternet.contains(element);
-          if(isContain){}else {
-            chawnghlang.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{
-        chawnghlang.put(e['fields']['title'] , e['fields']);
-      }});
-  }
-
-  khrihfahlabu1()async{
-
-    var hlabuinternet1 = await Services().fetchKhrifaHlaBu1();
-    hlabuinternet1.forEach((e) {
-      if(khrifaHlaBu.isNotEmpty){
-        for (var element in khrifaHlaBu.values) {
-
-          bool isContain = hlabuinternet1.contains(element);
-          if(isContain){}else {
-            khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{khrifaHlaBu.put(e['fields']['title'] , e['fields']);}});
-
-  }
-
-  khrihfahlabu2()async{
-
-
-    var hlabuinternet2 = await Services().fetchKhrifaHlaBu2();
-    hlabuinternet2.forEach((e) {if(khrifaHlaBu.isNotEmpty){for (var element in khrifaHlaBu.values) {bool isContain = hlabuinternet2.contains(element);if(isContain){}else {khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;}}}else{khrifaHlaBu.put(e['fields']['title'] , e['fields']);}});
-
-
-  }
-
-  khrihfahlabu3()async{
-
-
-    var hlabuinternet3 = await Services().fetchKhrifaHlaBu3();
-
-    hlabuinternet3.forEach((e) {
-      if(khrifaHlaBu.isNotEmpty){
-        for (var element in khrifaHlaBu.values) {
-
-          bool isContain = hlabuinternet3.contains(element);
-          if(isContain){}else {
-            khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{
-        khrifaHlaBu.put(e['fields']['title'] , e['fields']);
-      }});
-
-
-  }
-  khrihfahlabu4()async{
-
-
-
-    var hlabuinternet4 = await Services().fetchKhrifaHlaBu4();
-
-    hlabuinternet4.forEach((e) {
-      if(khrifaHlaBu.isNotEmpty){
-        for (var element in khrifaHlaBu.values) {
-
-          bool isContain = hlabuinternet4.contains(element);
-          if(isContain){}else {
-            khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{
-        khrifaHlaBu.put(e['fields']['title'] , e['fields']);
-      }});
-
-
-  }
-  khrihfahlabu5()async{
-
-
-
-    var hlabuinternet5 = await Services().fetchKhrifaHlaBu5();
-
-    hlabuinternet5.forEach((e) {
-      if(khrifaHlaBu.isNotEmpty){
-        for (var element in khrifaHlaBu.values) {
-
-          bool isContain = hlabuinternet5.contains(element);
-          if(isContain){}else {
-            khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{
-        khrifaHlaBu.put(e['fields']['title'] , e['fields']);
-      }});
-
-
-  }
-  khrihfahlabu6()async{
-
-
-    var hlabuinternet6 = await Services().fetchKhrifaHlaBu6();
-
-    hlabuinternet6.forEach((e) {
-      if(khrifaHlaBu.isNotEmpty){
-        for (var element in khrifaHlaBu.values) {
-
-          bool isContain = hlabuinternet6.contains(element);
-          if(isContain){}else {
-            khrifaHlaBu.put(e['fields']['title'] , e['fields']) ;
-          }
-        }
-      }else{
-        khrifaHlaBu.put(e['fields']['title'] , e['fields']);
-      }});
-  }
-
-  checkLine()async{
-    try{
-      List chek = await Services().checkLine();
-      if(chek.isNotEmpty){
-          pathianhlaData();
-          chawngHlangFunction();
-          khrihfahlabu1();
-          khrihfahlabu2();
-          khrihfahlabu3();
-          khrihfahlabu4();
-          khrihfahlabu5();
-          khrihfahlabu6();
-
-          pathianhlaData();
-          loadZunhla();
-
-
-          Timer(const Duration(milliseconds: 3),(){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Home()));
-
-           /*  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> AirTable(
-              datas: pathianHla.values.toList(),
-            )));*/
+  downloadSongsFromDrive() async {
+    const fileName = 'hla'; // Specify the desired file name
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/$fileName';
+    final file = File(filePath);
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+      //  final jsonString = response.body;
+      //  final jsonList = json.decode(jsonString) as List<dynamic>;
+
+        if (await file.exists()) {
+          await file.delete();
+          await file.writeAsBytes(response.bodyBytes).whenComplete((){
+            Timer(Duration.zero, () {
+              Get.off(() => const Home());
+            });
+          });
+
+        } else {
+          await file.writeAsBytes(response.bodyBytes);
+          Timer(Duration.zero, () {
+            Get.off(() => const Home());
           });
         }
-    }catch(e){
-      Timer(const Duration(milliseconds: 3),(){
 
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Home()));
-        /*Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> AirTable(
-          datas: pathianHla.values.toList(),
-        )));*/
+      } else {
+        if(await file.exists()){
+
+          Timer(Duration.zero, () {
+            Get.off(() => const Home());
+          });
+        }else{
+          const SimpleDialog(
+            title: Text('A Voikhatnak cu internet On piak a hau'),
+          );
+        }
+      }
+      setState(() {});
+
+    } catch (e) {
+      if(await file.exists()){
+
+        Timer(Duration.zero, () {
+          Get.off(() => OfflineHome());
+        });
+      }else{
+       const SimpleDialog(
+          title: Text('A Voikhatnak cu internet On piak a hau'),
+        );
+      }
+    }
+  }
+
+  double _progress = 0.0;
+
+  void _startDownload() async {
+    const fileName = 'hla'; // Specify the desired file name
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/$fileName';
+    final file = File(filePath);
+    final savePath = '${dir.path}/$fileName';
+    //  final savePath = File(filePath);
+
+    if (await file.exists()) {
+      final dio = Dio();
+      if (savePath.isEmpty) {
+        dio.download(
+          url,
+          savePath,
+          onReceiveProgress: (receivedBytes, totalBytes) {
+            if (totalBytes != -1) {
+              setState(() {
+                _progress = receivedBytes / totalBytes;
+              });
+            }
+          },
+        ).then((_) {
+          Get.off(() => const Home());
+        }).catchError((error) {
+          Get.off(() => const Home());
+        });
+      } else {
+        Timer(Duration.zero, () {
+          Get.off(() => const Home());
+        });
+      }
+    } else {
+      final dio = Dio();
+      dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (receivedBytes, totalBytes) {
+          if (totalBytes != -1) {
+            setState(() {
+              _progress = receivedBytes / totalBytes;
+            });
+          }
+        },
+      ).then((_) {
+        Get.off(() => const Home());
+      }).catchError((error) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Colors.white30,
+              title: const Text(
+                'No connection',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: const Text(
+                'A voi khat nak ahcun internet chikhat na on piak a hau.',
+                style: TextStyle(color: Colors.white),
+              ),
+              actions: [
+                ElevatedButton(
+                  clipBehavior: Clip.hardEdge,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.white30, // Set the desired background color
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Timer(const Duration(seconds: 3), () {
+                      _startDownload();
+                    });
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
       });
     }
-
   }
+
+  double fileSize = 0;
+
+  getFileSize(String url) async {
+    final dio = Dio();
+    final response = await dio.head(url);
+    final contentLength = response.headers.map['content-length'];
+    final sizeInBytes = int.parse(contentLength?.first ?? '0');
+    setState(() {
+      fileSize = sizeInBytes / (1024 * 1024);
+    });
+    //print(fileSize.toStringAsFixed(2));
+  }
+
+//favorite
+  readFavoriteFile() async {
+    const fileName = 'favorite'; // Specify the desired file name
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/$fileName';
+    final path = File(filePath);
+    if (await path.exists()) {
+      List<dynamic> l =
+          json.decode(await File(filePath).readAsString()) as List;
+      setState(() {
+        for (var element in l) {
+          favorites.add(element);
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
-    checkLine();
-      super.initState();
+    readFavoriteFile();
+      //getFileSize(url);
+    _startDownload();
+      //downloadSongsFromDrive();
+    super.initState();
   }
+
   @override
   void dispose() {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
-          Center(child: CircularProgressIndicator(color: Colors.white,backgroundColor: Colors.green,)),
-          SizedBox(height: 50,),
-          Center(child: Text("Please wait....",style: TextStyle(color: Colors.white,fontSize: 20),))
-        ],
-      )
-    );
+        backgroundColor: Colors.black12,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 3,
+              child: Image.asset('assets/logo.png'),
+            ),
+            Text(
+              'Welcome 🙏🏻',
+              style: GoogleFonts.vastShadow(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1),
+            ),
+            SizedBox(height: MediaQuery.of(context).size.height / 10),
+            Column(
+              children: [
+                const Center(
+                  child: CircularProgressIndicator(
+                    //  value: _progress,
+                    color: Colors.white,
+                    backgroundColor: Colors.green,
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                _progress == 0.0
+                    ? const Text(
+                        'loading..',
+                        style: TextStyle(color: Colors.white),
+                      )
+                    : Text(
+                        '${(_progress * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(color: Colors.white60),
+                      ),
+              ],
+            ),
+          ],
+        ));
   }
-
-  showDialogBox() => showCupertinoDialog<String>(
-    context: context,
-    builder: (BuildContext context) => CupertinoAlertDialog(
-      title: const Center(child: CircularProgressIndicator(color: Colors.red,backgroundColor: Colors.purple,)),
-      content:   Container(margin: const EdgeInsets.only(top: 14),child: const Text('Updating data..',style: TextStyle(letterSpacing: 2,fontWeight: FontWeight.bold),),),
-    ),
-  );
-
-
 }
 
+class OrientationHelper {
+  setPreferredOrientations(List<DeviceOrientation> orientations) {
+    return SystemChrome.setPreferredOrientations(orientations);
+  }
+
+  clearPreferredOrientations() {
+    return SystemChrome.setPreferredOrientations([]);
+  }
+}
