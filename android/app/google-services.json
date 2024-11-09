@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "853152976119",
+    "project_id": "music-lyrics-ed459",
+    "storage_bucket": "music-lyrics-ed459.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853152976119:android:b1ea228f3e7ed1ffdf97f2",
+        "android_client_info": {
+          "package_name": "chinplus.info.laihlalyrics.laihla_lyrics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "853152976119-pjqfg0183692dffg4t1mngonbi2cmpiv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa4jWTkz-XUnuwJgbtPYf3Lvmshhlalts"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853152976119-pjqfg0183692dffg4t1mngonbi2cmpiv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
