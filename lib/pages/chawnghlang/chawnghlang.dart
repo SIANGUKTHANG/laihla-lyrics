@@ -4,14 +4,13 @@ import '../../json_helper.dart';
 import 'chawnghlang_detail.dart';
 
 class ChawngHlang extends StatefulWidget {
-  const ChawngHlang({Key? key}) : super(key: key);
+  const ChawngHlang({super.key});
 
   @override
   State<ChawngHlang> createState() => _ChawngHlangState();
 }
 
 class _ChawngHlangState extends State<ChawngHlang> {
-
   List d = [];
 
   @override
@@ -20,7 +19,7 @@ class _ChawngHlangState extends State<ChawngHlang> {
     super.initState();
   }
 
-  _loadJsonData() async {
+  Future<void> _loadJsonData() async {
     List<dynamic> jsonData = await JsonHelper().loadChawngHlang();
     setState(() {
       d = jsonData;
@@ -30,47 +29,26 @@ class _ChawngHlangState extends State<ChawngHlang> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title:const Text('Chawnghlang Relnak',
+        title: const Text('Chawnghlang Relnak',
             style: TextStyle(
               letterSpacing: 1,
-              color: Colors.white,
-
+              fontSize: 14
             )),
-
         centerTitle: true,
       ),
       body: Column(
         children: [
-
-          const SizedBox(height: 20,),
-          d.isEmpty
-              ? Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 50),
-              child: const Column(
-                children: [
-                  Text(
-                    'Na kawl mi ka hmu kho lo   ',
-                    style: TextStyle(
-                        fontSize: 15,  ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
-            ),
-          )
-              : Expanded(
+          const SizedBox(
+            height: 20,
+          ),
+          Expanded(
             child: ListView.builder(
                 itemCount: d.length,
                 itemBuilder: (context, index) {
                   return OpenContainer(
-                      openColor: Colors.black87,
-                      closedColor: Colors.black87,
+                      openColor: Colors.black54,
+                      closedColor: Colors.black54,
                       openBuilder: (BuildContext con, fd) {
                         return ChawngHlangDetail(
                           title: d[index]['fields']['title'],
@@ -95,36 +73,28 @@ class _ChawngHlangState extends State<ChawngHlang> {
                           z9: d[index]['fields']['z9'],
                           z10: d[index]['fields']['z10'],
                         );
-                      }, closedBuilder: (BuildContext con, fd) {
-                    return Container(
-                      color: Colors.black87,
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ListTile(
-                              title: Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: Text(
-                                  d[index]['fields']['title'],
-                                  style:
-                                  const TextStyle(fontSize: 14,color: Colors.white70),
+                      },
+                      closedBuilder: (BuildContext con, fd) {
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ListTile(
+                                title: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    d[index]['fields']['title'],
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.white70),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Container(height: 0.6,color: Colors.white,
-                            width: MediaQuery.of(context).size.width/1.2,),
-
-                        ],
-                      ),
-                    );
-                  });
+                          ],
+                        );
+                      });
                 }),
           ),
-          const SizedBox(
-            height: 10,
-          )
         ],
       ),
     );

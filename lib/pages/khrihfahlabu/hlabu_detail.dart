@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 
-class HlaBuDetail extends StatefulWidget {
-  final String? title;
-  final String? zate;
-  final String? verse1;
-  final String? verse2;
-  final String? verse3;
-  final String? verse4;
-  final String? verse5;
-  final String? verse6;
-  final String? verse7;
-  final String? chorus;
+import 'khrifahlabu_slide.dart';
 
-  const HlaBuDetail({
-    Key? key,
-    this.title,
-    this.verse1,
-    this.verse2,
-    this.verse3,
-    this.verse4,
-    this.verse5,
-    this.verse6,
-    this.verse7,
-    this.chorus,
-    this.zate,
-  }) : super(key: key);
+class HlaBuDetail extends StatefulWidget {
+  final title;
+  final zate;
+  final verse1;
+  final verse2;
+  final verse3;
+  final verse4;
+  final verse5;
+  final verse6;
+  final verse7;
+  final chorus;
+
+  const HlaBuDetail(
+      {super.key,
+      this.title,
+      this.verse1,
+      this.verse2,
+      this.verse3,
+      this.verse4,
+      this.verse5,
+      this.chorus,
+      this.verse6,
+      this.verse7,
+      this.zate});
 
   @override
   State<HlaBuDetail> createState() => _HlaBuDetailState();
@@ -33,95 +34,223 @@ class HlaBuDetail extends StatefulWidget {
 class _HlaBuDetailState extends State<HlaBuDetail> {
   double fontSize = 15;
 
-  Widget _buildVerse(String? verse) {
-    if (verse == null) return Container();
-    return Padding(
-      padding: const EdgeInsets.all(6.0),
-      child: Text(
-        verse,
-        style:   TextStyle(fontSize: fontSize, color: Colors.white70),
-      ),
-    );
-  }
-
-  Widget _buildChorus() {
-    if (widget.chorus == null) return Container();
-    return Container(
-      margin: const EdgeInsets.only(left: 70),
-      child: Text(
-        widget.chorus!,
-        style:   TextStyle(fontSize: fontSize, color: Colors.white70),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.black87,
+        appBar: AppBar(
+          title: Text(
+            widget.title,
+            style: TextStyle(fontSize: 14),
+          ),
+          
+          actions: [
+            IconButton(onPressed:(){
+      Navigator.of(context).push(MaterialPageRoute(builder: (context)=> LyricsViewer(
+      title: widget.title,
+      verse1: widget.verse1,
+      verse2: widget.verse2,
+      verse3: widget.verse3,
+      verse4: widget.verse4,
+      verse5: widget.verse5,
+      verse6: widget.verse6,
+
+      verse7: widget.verse7,
+      chorus: widget.chorus,
+      )));
+      }, icon: Icon(Icons.slideshow)),
+            SizedBox(width: 4,)
+          ],
+        ),
         body: SelectionArea(
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              Card(
-                elevation: 3,
-                color: Colors.green.shade200,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Center(
-                    child: Text(
-                      widget.title ?? 'Untitled',
-                      style:  const TextStyle(
-                        color: Colors.black,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ),
-                ),
+              const SizedBox(
+                height: 10,
               ),
               Expanded(
                 child: GestureDetector(
                   onDoubleTap: () {
-                    setState(() {
-                      fontSize = (fontSize == 30) ? fontSize - 15 : fontSize + 5;
-                    });
+
+                    if (fontSize == 30) {
+                      fontSize = fontSize - 15;
+                    } else {
+                      fontSize = fontSize + 5;
+                    }
+                    setState(() {});
                   },
                   child: ListView(
                     children: [
                       widget.zate == null
                           ? Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          children: [
-                            _buildVerse(widget.verse1),
-                            _buildChorus(),
-                            _buildVerse(widget.verse2),
-                            _buildChorus(),
-                            _buildVerse(widget.verse3),
-                            _buildChorus(),
-                            _buildVerse(widget.verse4),
-                            _buildChorus(),
-                            _buildVerse(widget.verse5),
-                            _buildChorus(),
-                            _buildVerse(widget.verse6),
-                            _buildChorus(),
-                            _buildVerse(widget.verse7),
-                            _buildChorus(),
-                            const SizedBox(height: 100),
-                          ],
-                        ),
-                      )
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                children: [
+                                  widget.verse1 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse1,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.chorus == null
+                                      ? Container()
+                                      : Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 70),
+                                          child: Text(
+                                            widget.chorus,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          )),
+                                  widget.verse2 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse2,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse2 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 70),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  widget.verse3 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse3,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse3 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 70),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  widget.verse4 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse4,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse4 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 70),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  widget.verse5 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse5,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse5 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 70),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  widget.verse6 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse6,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse6 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 60),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  widget.verse7 == null
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Text(
+                                            widget.verse7,
+                                            style:   TextStyle( fontSize: fontSize),
+                                          ),
+                                        ),
+                                  widget.verse7 == null
+                                      ? Container()
+                                      : Container(
+                                          child: widget.chorus == null
+                                              ? Container()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 70),
+                                                  child: Text(
+                                                    widget.chorus,
+                                                    style:   TextStyle( fontSize: fontSize),
+                                                  )),
+                                        ),
+                                  const SizedBox(
+                                    height: 100,
+                                  )
+                                ],
+                              ),
+                            )
                           : Container(
-                        margin: const EdgeInsets.only(top: 4.0),
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          widget.zate!,
-                          style:  TextStyle(fontSize: fontSize, color: Colors.white70),
-                        ),
-                      ),
+                              margin: const EdgeInsets.only(top: 4.0),
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                widget.zate,
+                                style:   TextStyle( fontSize: fontSize),
+                              ),
+                            ),
                     ],
                   ),
                 ),

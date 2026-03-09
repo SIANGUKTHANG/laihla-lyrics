@@ -262,12 +262,10 @@ class _WebDetailsState extends State<WebDetails> {
     return SafeArea(
       child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.black87,
-            leading: Container(),
+
             centerTitle: true,
             title: Text(widget.title!,
                 style: TextStyle(
-                  color: Colors.blueGrey.shade200,
                   fontWeight: FontWeight.w500,
                   fontSize: 20,
                 )),
@@ -473,6 +471,8 @@ class _WebDetailsState extends State<WebDetails> {
                                   onTapChord: () {},
                                 ),
                         ),
+
+                        const SizedBox(height: 400,)
                       ],
                     ),
                   ),

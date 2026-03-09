@@ -14,7 +14,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 Future<bool> isEmailRegistered(String email) async {
-  const String url = 'https://itrungrul.xyz/users/all';
+  const String url = 'https://laihlalyrics.itrungrul.com/users/all';
 
   try {
     final response = await http.get(Uri.parse(url));
@@ -70,7 +70,7 @@ class _SignUpPageState extends State<SignUpPage> {
       return; // Exit if email is already registered
     }
 
-    const String url = 'https://itrungrul.xyz/users/create';
+    const String url = 'https://laihlalyrics.itrungrul.com/users/create';
 
     try {
       _toggleLoading();
@@ -118,9 +118,6 @@ class _SignUpPageState extends State<SignUpPage> {
         confirmPasswordController.clear();
 
         Get.off(Home(
-          username: username,
-          phone: phone,
-          email: email,
         ));
       } else {
         if (kDebugMode) {
@@ -158,7 +155,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+
       body: Stack(
         children: [
           Padding(

@@ -71,8 +71,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             signingConfig signingConfigs.release
         }
     }
@@ -83,8 +83,8 @@ flutter {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
-    implementation 'com.google.firebase:firebase-messaging:23.2.1'
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0'
-    implementation 'com.google.android.gms:play-services-ads:22.2.0'
+    implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+    implementation 'com.google.firebase:firebase-messaging:25.0.1'
+    implementation 'com.google.firebase:firebase-analytics-ktx:22.5.0'
+    implementation 'com.google.android.gms:play-services-ads:24.9.0'
 }

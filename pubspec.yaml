@@ -1,11 +1,9 @@
 name: laihla_lyrics
 description: A new Flutter project.
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
-version: 2.0.0+27
+version: 2.1.1+30
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
@@ -16,39 +14,38 @@ dependencies:
 
 
   cupertino_icons: ^1.0.2
-  http: ^0.13.5
   flutter_native_splash: ^2.2.0+1
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   url_launcher: ^6.1.6
-  dio: ^4.0.6
   path_provider: ^2.1.4
-  permission_handler: ^10.2.0
+  permission_handler: ^12.0.0+1
+  dio: ^5.8.0+1       # to fix security warnings
+  http: ^1.4.0
+  google_mobile_ads: ^6.0.0
   animations: ^2.0.7
   get: ^4.6.5
   auto_size_text: ^3.0.0
-  google_mobile_ads: ^5.2.0
   flutter_chord_mod: ^0.0.46
   banner_carousel: ^1.2.1
   sliding_up_panel: ^2.0.0+1
-  firebase_core: ^3.6.0
-  firebase_messaging: ^15.1.3
   fluttertoast: ^8.2.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   audioplayers: ^6.1.0
-
-
-
-  connectivity_plus: ^6.1.0
   socket_io_client: ^3.0.0
   image_picker: ^1.1.2
   path: ^1.9.0
+  package_info_plus: ^8.3.0
+  firebase_core: ^4.4.0
+  firebase_messaging: ^16.1.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator:
   build_runner:
-  flutter_lints: ^2.0.1
+  flutter_lints: ^6.0.0
 
 
 flutter_launcher_icons:
@@ -71,3 +68,4 @@ flutter:
   assets:
     - assets/
     - assets/chords/
+    - assets/bible.json

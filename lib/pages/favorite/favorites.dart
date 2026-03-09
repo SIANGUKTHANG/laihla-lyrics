@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../main.dart';
- import 'favorite_detail.dart';
+ import '../laihla/detail.dart';
 
 class Favorite extends StatefulWidget {
   const Favorite({super.key});
@@ -62,8 +62,8 @@ class _FavoriteState extends State<Favorite> {
             backgroundColor: Colors.black87,
             leading: Container(),
             title: const Text(
-              'Favorite Songs',
-              style: TextStyle(fontSize: 18,
+              'Favorite',
+              style: TextStyle(fontSize: 16,
                   color: Colors.white,
                   fontStyle: FontStyle.normal,
                   fontWeight: FontWeight.w500,
@@ -97,27 +97,28 @@ class _FavoriteState extends State<Favorite> {
                     itemCount:  favorites.length,
                     itemBuilder: (context, index) {
                      var song = favorites[index];
+
                      return Column(
                        children: [
                          Container(
                            color: Colors.black87,
                            child: ListTile(
                              onTap: (){
-                               Get.to(()=>FavoriteDetails(
+                               Get.to(()=>DetailsPage(
                                  title: song['title'],
                                  chord: song['chord'],
                                  singer: song['singer'],
-                                 uploader: song['uploader'],
+
                                  composer: song['composer'],
-                                 verse1: song['verse1'],
-                                 verse2: song['verse2'],
-                                 verse3: song['verse3'],
-                                 verse4: song['verse4'],
-                                 verse5: song['verse5'],
+                                 verse1: song['verse 1'],
+                                 verse2: song['verse 2'],
+                                 verse3: song['verse 3'],
+                                 verse4: song['verse 4'],
+                                 verse5: song['verse 5'],
                                  songtrack: song['songtrack'],
                                  chorus: song['chorus'],
                                  endingChorus: song['endingchorus'],
-                                 id: song['_id'],
+
 
                                ));
                              },
@@ -137,10 +138,7 @@ class _FavoriteState extends State<Favorite> {
                              ),
                            ),
                          ),
-                         Container(
-                           height: 0.6,
-                           color: Colors.white,
-                         )
+
                        ],
                      );
                     }),

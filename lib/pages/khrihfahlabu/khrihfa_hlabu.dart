@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import '../../json_helper.dart';
 import 'hlabu_detail.dart';
 
-class KhrihfaHlaBu extends StatefulWidget {
-  const KhrihfaHlaBu({Key? key}) : super(key: key);
+class HlaBu extends StatefulWidget {
+  const HlaBu({super.key});
 
   @override
-  State<KhrihfaHlaBu> createState() => _KhrihfaHlaBuState();
+  State<HlaBu> createState() =>  HlaBuState();
 }
 
-class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
+class  HlaBuState extends State<HlaBu> {
   List d = [];
   List data = [];
   final TextEditingController _filter = TextEditingController();
@@ -22,8 +22,8 @@ class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
     super.initState();
   }
 
-  _loadJsonData() async {
-    List<dynamic> jsonData = await JsonHelper().loadKhrihfaHlaBu();
+  Future<void> _loadJsonData() async {
+    List<dynamic> jsonData = await JsonHelper().loadKhrihFaHlaBu();
     setState(() {
       d = jsonData;
       data = jsonData;
@@ -43,14 +43,13 @@ class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+
       appBar: AppBar(
-        backgroundColor: Colors.black,
+
         title: const Text('Khrihfa Hlabu',
             style:   TextStyle(
               letterSpacing: 1,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+
             )),
         centerTitle: true,
       ),
@@ -64,28 +63,28 @@ class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
               height: 50,
               child: TextFormField(
                 autofocus: true,
-                style: const TextStyle(fontSize: 20,color: Colors.white),
+
                 maxLines: 1,
-                cursorColor: Colors.white,
+
                 controller: _filter,
                 onChanged: (value) {
                   _filterJsonData(value);
                 },
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderSide :   const BorderSide(color: Colors.black,width: 0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    borderSide :   const BorderSide( width: 0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide :   const BorderSide(color: Colors.white,width: 0.5),
-                    borderRadius: BorderRadius.circular(16),
+                    borderSide :   const BorderSide( width: 0.5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   suffixIcon: const Icon(
                     Icons.search,
-                    color: Colors.white,
+
 
                   ),
-                  hintText: '     Kawlnak',
+                  hintText: 'Kawlnak',
                   hintStyle:
                   const TextStyle(letterSpacing: 4, fontSize: 20),
                 ),
@@ -99,7 +98,7 @@ class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
               child: const Column(
                 children:   [
                   Text(
-                    'Na kawl mi um lo   ',
+                    'No Data',
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.w500),
                   ),
@@ -115,31 +114,28 @@ class _KhrihfaHlaBuState extends State<KhrihfaHlaBu> {
                 itemCount: d.length,
                 itemBuilder: (context, index) {
                   return OpenContainer(
-openColor: Colors.black87,
-closedColor: Colors.black87,
+closedColor: Colors.black54,
+openColor: Colors.black54,
                       closedBuilder: (BuildContext con, fd) {
-                        return Container(
-                          color: Colors.black87,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                 title: Padding(
-                                   padding: const EdgeInsets.only(left: 8.0),
-                                   child: Text(
-                                     d[index]['fields']['title'],
-                                     style:
-                                     const TextStyle(fontSize: 14,color: Colors.white70),
-                                   ),
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ListTile(
+                               title: Padding(
+                                 padding: const EdgeInsets.only(left: 8.0),
+                                 child: Text(
+                                   d[index]['fields']['title'],
+                                   style:
+                                   const TextStyle(fontSize: 14 ),
                                  ),
-                                  ),
-                              ),
-                              Container(height: 0.6,color: Colors.white70,
-                              width: MediaQuery.of(context).size.width/1.2,),
+                               ),
+                                ),
+                            ),
+                            SizedBox(height: 0.6,
+                            width: MediaQuery.of(context).size.width/1.2,),
 
-                            ],
-                          ),
+                          ],
                         );
                       }, openBuilder: (BuildContext con, fd) {
                     return HlaBuDetail(

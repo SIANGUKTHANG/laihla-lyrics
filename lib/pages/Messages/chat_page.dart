@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../user/profile.dart';
 import '../web_socket/socket_service.dart';
 import 'models.dart';
 
 class ChatPage extends StatefulWidget {
-  final String userId; // The logged-in user's ID
+
+  final List songs; // Thsongse logged-in user's ID
+  final String userId; // Thsongse logged-in user's ID
   final String chatPartnerId; // The ID of the user they are chatting with
   final String chatPartnerName; // Display name of the chat partner
   final String chatPartnerUrl; // Display name of the chat partner
@@ -17,7 +21,7 @@ class ChatPage extends StatefulWidget {
     required this.userId,
     required this.chatPartnerId,
     required this.chatPartnerName,
-    required this.chatPartnerUrl,
+    required this.chatPartnerUrl, required this.songs,
   });
 
   @override
@@ -62,22 +66,24 @@ class ChatPageState extends State<ChatPage> {
     setState(() {
       isLoading = true;
     });
+
     final url = Uri.parse(
-        'https://itrungrul.xyz/messages/${widget.userId}?page=$page&limit=$limit');
+        'https://laihlalyrics.itrungrul.com/messages/${widget.userId}/${widget.chatPartnerId}?page=$page&limit=$limit');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
-      final List<Message> fetchedMessages = (data as List)
+      final List<Message> fetchedMessages = (data['messages'] as List)
           .map((json) => Message.fromJson(json))
           .toList();
 
+      final int totalMessages = data['totalMessages'];
+
       setState(() {
         page++;
-        messages.insertAll(
-            0, fetchedMessages); // Add new messages at the beginning
-        hasMore = fetchedMessages.length == limit;
+        messages.insertAll(0, fetchedMessages); // Add new messages at the beginning
+        hasMore = messages.length < totalMessages; // Check if more messages are available
       });
     } else {
       throw Exception('Failed to load chat messages');
@@ -88,11 +94,12 @@ class ChatPageState extends State<ChatPage> {
     });
   }
 
+
   Future<void> sendMessage() async {
     if (messageController.text.isEmpty) return;
 
     final newMessage = messageController.text;
-    final url = Uri.parse('https://itrungrul.xyz/messages/create');
+    final url = Uri.parse('https://laihlalyrics.itrungrul.com/messages/create');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -126,16 +133,24 @@ class ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: widget.chatPartnerUrl== ''?
+        leading: InkWell(   onTap: (){
+          Get.to(() => ProfileScreen(
+            songs: widget.songs,
+            username: widget.chatPartnerName,
+            id: widget.chatPartnerId,
+            imageUrl: widget.chatPartnerUrl,
+          ));
+        },child: widget.chatPartnerUrl== ''?
+
         Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: Image.asset('assets/account.png'),
         )
-        :Padding(
+            :Padding(
           padding: const EdgeInsets.all(6.0),
           child: CircleAvatar(backgroundImage: NetworkImage(widget.chatPartnerUrl),),
-        ),
-        title: Text(widget.chatPartnerName,style: TextStyle(color: Colors.white70),),
+        ),),
+        title: Text(widget.chatPartnerName,style: const TextStyle(color: Colors.white70),),
       ),
       body: Column(
         children: [
@@ -144,6 +159,7 @@ class ChatPageState extends State<ChatPage> {
               onNotification: (scrollInfo) {
                 if (scrollInfo.metrics.pixels ==
                     scrollInfo.metrics.minScrollExtent) {
+
                   fetchChatMessages(); // Load more messages when scrolled to the top
                 }
                 return false;
@@ -175,7 +191,11 @@ class ChatPageState extends State<ChatPage> {
                         '${hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, )} $period';
 
                     return ListTile(
-                      leading: isMe?const SizedBox(width: 0,):CircleAvatar(backgroundImage: NetworkImage(widget.chatPartnerUrl),),
+
+
+                      leading: isMe?const SizedBox(width: 0,):
+                      widget.chatPartnerUrl==''?const CircleAvatar(child: Icon(Icons.person),)
+                      :CircleAvatar(backgroundImage: NetworkImage(widget.chatPartnerUrl),),
 
                       title: Align(
                         alignment:
@@ -226,10 +246,13 @@ class ChatPageState extends State<ChatPage> {
               children: [
                 Expanded(
                   child: TextField(
+                    minLines: 1,
+                    maxLines: null,
                     controller: messageController,
                     cursorColor: Colors.white70,
                     style: const TextStyle(color: Colors.white70),
                     decoration: InputDecoration(
+
                       hintText: 'Type a message..',
                       hintStyle: const TextStyle(color: Colors.white70),
                       border: OutlineInputBorder(

@@ -24,8 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> loginUser(
-      BuildContext context, String email, String password)
-  async {
+      BuildContext context, String email, String password) async {
     if (!isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -35,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
       return; // Exit if email is invalid
     }
 
-    const String url = 'https://itrungrul.xyz/users/login';
+    const String url = 'https://laihlalyrics.itrungrul.com/users/login';
 
     try {
       final response = await http.post(
@@ -58,11 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         await userBox.put('phone', list['user']['phone']);
         await userBox.put('id', list['user']['_id']);
         await userBox.put('password', password);
-        Get.off(() => Home(
-              username: list['user']['username'] ?? '',
-              email: email,
-              phone: list['user']['phone'] ?? '',
-            ));
+        Get.off(() => Home());
       } else {
         // Show error if fetching users failed
         Get.snackbar(
@@ -95,11 +90,7 @@ class _LoginPageState extends State<LoginPage> {
         savedPassword != null &&
         username.isNotEmpty &&
         phone.isNotEmpty) {
-      Get.off(() => Home(
-            username: username,
-            email: savedEmail,
-            phone: phone,
-          ));
+      Get.off(() => Home());
     }
   }
 
@@ -112,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -165,11 +156,7 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Get.off(const Home(
-                      username: '',
-                      phone: '',
-                      email: '',
-                    ));
+                    Get.off(const Home());
                   },
                   child: const Text('Use the Application Without Sign In'),
                 ),

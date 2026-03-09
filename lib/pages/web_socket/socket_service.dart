@@ -6,7 +6,7 @@ class WebSocketService {
 
   void initializeSocket(String userId) {
     // Replace with your server address
-    socket = io.io('https://itrungrul.xyz', <String, dynamic>{
+    socket = io.io('https://laihlalyrics.itrungrul.com', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

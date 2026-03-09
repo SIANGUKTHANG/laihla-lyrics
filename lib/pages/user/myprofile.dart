@@ -17,14 +17,12 @@ import '../web_socket/upload.dart';
 import 'login.dart';
 
 class MyProfile extends StatefulWidget {
-  final String username;
   final Box userBox;
 
   const MyProfile({
-    Key? key,
-    required this.username,
+    super.key,
     required this.userBox,
-  }) : super(key: key);
+  });
 
   @override
   State<MyProfile> createState() => _MyProfileState();
@@ -33,6 +31,8 @@ class MyProfile extends StatefulWidget {
 class _MyProfileState extends State<MyProfile> {
   String imageUrl = '';
   final ImagePicker _picker = ImagePicker();
+  final Box userBox = Hive.box('userBox');
+
   List<dynamic> songs = [];
   List<dynamic> filter = [];
   List<dynamic> mySongs = [];
@@ -86,7 +86,7 @@ class _MyProfileState extends State<MyProfile> {
       var response = await request.send();
 
       // Check the response status
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final responseData = await response.stream.bytesToString();
         final decodedData =
             jsonDecode(responseData); // Decode JSON response if needed
@@ -144,13 +144,11 @@ class _MyProfileState extends State<MyProfile> {
 
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: Scaffold(
         floatingActionButton: widget.userBox.isEmpty
             ? const SizedBox()
             : FloatingActionButton(
-                backgroundColor: Colors.blueGrey,
                 onPressed: () {
                   Get.to(const UploadSongPage())?.then((result) {
                     if (result == true) {
@@ -161,7 +159,7 @@ class _MyProfileState extends State<MyProfile> {
                           msg: 'Data Download success',
                           textColor: Colors.green);
                     }
-                  });;
+                  });
                 },
                 child: const Icon(
                   Icons.add,
@@ -170,26 +168,19 @@ class _MyProfileState extends State<MyProfile> {
                 ),
               ),
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
             _buildUserInfo(),
-            const  Row(
-              children: [
-                 Padding(
-                   padding: EdgeInsets.only(left: 20),
-                   child: Text(
+            Text(
                     'My Songs',
                     style: TextStyle(
                         color: Colors.white,
                         letterSpacing: 2,
                         fontWeight: FontWeight.bold),
-                                   ),
-                 ),
-                Expanded(child: SizedBox(
-                  child: Text('No Song Add Yet!'),
-                ))
-              ],
-            ),
+                  ),
+
             Expanded(child: _buildSettings()),
           ],
         ),
@@ -289,7 +280,8 @@ class _MyProfileState extends State<MyProfile> {
                     icon: const Icon(Icons.camera_alt,
                         color: Colors.white, size: 15),
                     onPressed: () {
-                      uploadImage(widget.username, widget.userBox);
+                      uploadImage(
+                          widget.userBox.get('username'), widget.userBox);
                     },
                   ),
                 ),
@@ -307,7 +299,7 @@ class _MyProfileState extends State<MyProfile> {
       title: Column(
         children: [
           Text(
-            widget.username,
+            widget.userBox.get('username'),
             style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey.shade200,
@@ -335,100 +327,101 @@ class _MyProfileState extends State<MyProfile> {
       itemCount: songs.length,
       itemBuilder: (context, index) {
         final song = songs[index];
-
-        print(song['uploader']['username']);
-        return songs.isEmpty ? const Center(
-          child: Text('No Song Add Yet!',style: TextStyle(
-            color: Colors.white
-          ),),
-        ):Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: ListTile(
-              onTap: () {
-                Get.to(() => FavoriteDetails(
-                      title: song['title'],
-                      chord: song['chord'],
-                      singer: song['singer'],
-                      uploader: song['uploader']['username'],
-                      composer: song['composer'],
-                      verse1: song['verse1'],
-                      verse2: song['verse2'],
-                      verse3: song['verse3'],
-                      verse4: song['verse4'],
-                      verse5: song['verse5'],
-                      songtrack: song['songtrack'],
-                      chorus: song['chorus'],
-                      endingChorus: song['endingchorus'],
-                      id: song['uploader']['_id'],
-                    ));
-              },
-              leading: CircleAvatar(
-                backgroundColor: Colors.black12,
-                child: Icon(
-                  Icons.music_note,
-                  color: Colors.blueGrey.shade500,
+        return songs.isEmpty
+            ? const Center(
+                child: Text(
+                  'No Song Add Yet!',
+                  style: TextStyle(color: Colors.white),
                 ),
-              ),
-              title: Text(
-                song['title'] ?? '',
-                style: TextStyle(
-                    color: Colors.blueGrey.shade200,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1),
-              ),
-              subtitle: Text(
-                song['singer'] ?? '',
-                style: const TextStyle(
-                    color: Colors.blueGrey,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1),
-              ),
-              trailing: widget.userBox.isEmpty
-                  ? const SizedBox()
-                  : PopupMenuButton<String>(
-                      color: Colors.blueGrey.shade900,
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  UpdateSongPage(song: song),
-                            ),
-                          ).then((result) {
-                            if (result == true) {
-                                 _fetchInitialSongs();
-                                 Fluttertoast.showToast(
-                                     backgroundColor: Colors.transparent,
-                                     msg: 'Edit success',
-                                     textColor: Colors.green);
-                            }
-                          });
-                        }
-                      },
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<String>>[
-                        const PopupMenuItem<String>(
-                          value: 'edit',
-                          child: ListTile(
-                            title: Icon(
-                              Icons.edit,
-                              color: Colors.white70,
-                            ),
-                            leading: Text(
-                              'edit',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                        )
-                      ],
-                    )),
-        );
+              )
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: ListTile(
+                    onTap: () {
+                      Get.to(() => FavoriteDetails(
+                            title: song['title'],
+                            chord: song['chord'],
+                            singer: song['singer'],
+                            uploader: song['uploader']['username'],
+                            composer: song['composer'],
+                            verse1: song['verse1'],
+                            verse2: song['verse2'],
+                            verse3: song['verse3'],
+                            verse4: song['verse4'],
+                            verse5: song['verse5'],
+                            songtrack: song['songtrack'],
+                            chorus: song['chorus'],
+                            endingChorus: song['endingchorus'],
+                            id: song['uploader']['_id'],
+                          ));
+                    },
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.black12,
+                      child: Icon(
+                        Icons.music_note,
+                        color: Colors.blueGrey.shade500,
+                      ),
+                    ),
+                    title: Text(
+                      song['title'] ?? '',
+                      style: TextStyle(
+                          color: Colors.blueGrey.shade200,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1),
+                    ),
+                    subtitle: Text(
+                      song['singer'] ?? '',
+                      style: const TextStyle(
+                          color: Colors.blueGrey,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1),
+                    ),
+                    trailing: widget.userBox.isEmpty
+                        ? const SizedBox()
+                        : PopupMenuButton<String>(
+                            color: Colors.blueGrey.shade900,
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        UpdateSongPage(song: song),
+                                  ),
+                                ).then((result) {
+                                  if (result == true) {
+                                    _fetchInitialSongs();
+                                    Fluttertoast.showToast(
+                                        backgroundColor: Colors.transparent,
+                                        msg: 'Edit success',
+                                        textColor: Colors.green);
+                                  }
+                                });
+                              }
+                            },
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry<String>>[
+                              const PopupMenuItem<String>(
+                                value: 'edit',
+                                child: ListTile(
+                                  title: Icon(
+                                    Icons.edit,
+                                    color: Colors.white70,
+                                  ),
+                                  leading: Text(
+                                    'edit',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+              );
       },
     );
   }
 
-  _fetchInitialSongs() async {
+  Future<void> _fetchInitialSongs() async {
     const fileName = 'hla';
     final dir = await getTemporaryDirectory();
     final savePath = '${dir.path}/$fileName';
@@ -449,7 +442,7 @@ class _MyProfileState extends State<MyProfile> {
     }
   }
 
-  readJsonFile() async {
+  Future<void> readJsonFile() async {
     const fileName = 'hla'; // Specify the desired file name
     final dir = await getTemporaryDirectory();
     final filePath = '${dir.path}/$fileName';
@@ -466,5 +459,4 @@ class _MyProfileState extends State<MyProfile> {
 
     _filterSongs(widget.userBox.get('id'));
   }
-
 }

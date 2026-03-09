@@ -61,7 +61,7 @@ class UploadSongPageState extends State<UploadSongPage> {
     super.initState();
   }
 
-  getUser() async {
+  Future<void> getUser() async {
     username = await userBox.get('username');
     id = await userBox.get('id');
   }
@@ -102,7 +102,7 @@ class UploadSongPageState extends State<UploadSongPage> {
 
         // Send the new song data to the server
         final response = await http.post(
-          Uri.parse('https://itrungrul.xyz/api/songs'),
+          Uri.parse('https://laihlalyrics.itrungrul.com/api/songs'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(newSong),
         );
@@ -190,13 +190,8 @@ class UploadSongPageState extends State<UploadSongPage> {
                       child: Column(
                         children: [
                           // Category Dropdown
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: Colors.purple.withOpacity(1)),
-                            ),
+                          Padding(
+
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                             child: DropdownButtonFormField<String>(
@@ -215,7 +210,7 @@ class UploadSongPageState extends State<UploadSongPage> {
                                         child: Text(
                                           category,
                                           style: const TextStyle(
-                                              color: Colors.red, fontSize: 20),
+                                              color: Colors.white, fontSize: 14),
                                         ),
                                       ))
                                   .toList(),
@@ -226,7 +221,6 @@ class UploadSongPageState extends State<UploadSongPage> {
                               },
                               decoration: const InputDecoration(
                                 labelText: 'Category',
-                                labelStyle: TextStyle(color: Colors.white70),
                               ),
                             ),
                           ),
@@ -345,12 +339,7 @@ class UploadSongPageState extends State<UploadSongPage> {
     required TextEditingController controller,
   }) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.5)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: TextFormField(
         cursorColor: Colors.white,
         minLines: 1,
@@ -386,9 +375,9 @@ class UploadSongPageState extends State<UploadSongPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.5)),
+
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: TextFormField(
@@ -398,7 +387,7 @@ class UploadSongPageState extends State<UploadSongPage> {
         keyboardType: TextInputType.multiline,
         textInputAction: TextInputAction.newline,
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+
         decoration: InputDecoration(
           labelText: label,
           border: InputBorder.none,
@@ -421,9 +410,9 @@ class UploadSongPageState extends State<UploadSongPage> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+
           ),
           padding: const EdgeInsets.all(16),
           child: child,

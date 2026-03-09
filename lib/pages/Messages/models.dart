@@ -29,10 +29,10 @@ class Message {
       message: json['message'],
       senderName: json['sender']['username'],
       senderId: json['sender']['_id'],
-      senderImageUrl: json['sender']['imageUrl'],
+      senderImageUrl: json['sender']['imageUrl']??'',
       receiverName: json['receiver']['username'],
       receiverId: json['receiver']['_id'],
-      receiverImageUrl: json['receiver']['imageUrl'],
+      receiverImageUrl: json['receiver']['imageUrl']??'',
       createdAt: DateTime.parse(json['createdAt']),
     );
   }
@@ -60,7 +60,47 @@ class Conversation {
       createdAt: DateTime.parse(json['createdAt']),
       participantName: json['participantInfo']['username'],
       participantId: json['_id']['participant'],
-      participantImageUrl: json['participantInfo']['imageUrl'],
+      participantImageUrl: json['participantInfo']['imageUrl']??'',
     );
   }
 }
+
+class User {
+  final String id;
+  final String username;
+  final String phone;
+  final String email;
+  final String imageUrl;
+
+  int songCount; // <-- Add this line
+
+  User({
+    required this.id,
+    required this.username,
+    required this.phone,
+    required this.email,
+    required this.imageUrl,
+    this.songCount = 0, // <-- Default to 0
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['_id'],
+      username: json['username'],
+      phone: json['phone'],
+      email: json['email'],
+      imageUrl: json['imageUrl'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'username': username,
+      'phone': phone,
+      'email': email,
+      'imageUrl': imageUrl,
+    };
+  }
+}
+

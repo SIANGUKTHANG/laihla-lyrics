@@ -15,11 +15,12 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../../main.dart';
 import '../chord/lyrics_chord.dart';
+import '../khrihfahlabu/khrifahlabu_slide.dart';
 
 // ignore: must_be_immutable
 class DetailsPage extends StatefulWidget {
   final String? title;
-  final String? chord;
+  final bool? chord;
   final String? singer;
   final String? composer;
   final String? verse1;
@@ -69,7 +70,7 @@ class _DetailsPageState extends State<DetailsPage> {
   bool isConnected = false;
   InterstitialAd? _interstitialAd;
   bool _isInterstitialAdReady = false;
-  int random = Random().nextInt(4) + 1;
+  int random = Random().nextInt(2) + 1;
 
   bool downloading = false;
   double progress = 0.0;
@@ -85,9 +86,14 @@ class _DetailsPageState extends State<DetailsPage> {
   bool audioplayed = false;
   late String urlPath;
   int currentIndex = 0;
-  double fontSiZ = 14;
+  double fontSize = 14;
 
   //
+
+  bool _isScrolling = false;
+  double speedScroll = 10;
+
+  final List<double> speedOptions = [1, 3, 6, 10, 14, 17, 20];
 
   void loadInterstitialAd() {
     InterstitialAd.load(
@@ -177,9 +183,10 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
-    for (var element in  downloads.values) {
-      var b =  downloads.get(widget.title! + widget.singer!);
-      bool d =  downloads.values.contains(b);
+    _scrollController = ScrollController();
+    for (var element in downloads.values) {
+      var b = downloads.get(widget.title! + widget.singer!);
+      bool d = downloads.values.contains(b);
       if (d) {
         setState(() {
           alreadyAxist = true;
@@ -201,7 +208,7 @@ class _DetailsPageState extends State<DetailsPage> {
       int rminutes = sminutes - (shours * 60);
       int rseconds = sseconds - (sminutes * 60 + shours * 60 * 60);
 
-      maxDurationlabel = "$rminutes/$rseconds";
+      maxDurationlabel = "$rminutes:$rseconds";
     });
 
     player.onPositionChanged.listen((Duration event) {
@@ -216,15 +223,15 @@ class _DetailsPageState extends State<DetailsPage> {
       int rminutes = sminutes - (shours * 60);
       int rseconds = sseconds - (sminutes * 60 + shours * 60 * 60);
 
-      currentpostlabel = "$rminutes/$rseconds";
+      currentpostlabel = "$rminutes:$rseconds";
 
       setState(() {
         //refresh the UI
       });
     });
 
-    _scrollController = ScrollController();
     OrientationHelper().clearPreferredOrientations();
+
     bottomBanner = BannerAd(
       //ca-app-pub-6997241259854420~8257797802
       adUnitId: Platform.isAndroid
@@ -248,7 +255,7 @@ class _DetailsPageState extends State<DetailsPage> {
     super.initState();
     loadInterstitialAd();
 
-    for (var element in  favorites) {
+    for (var element in favorites) {
       setState(() {
         if (element['title'] == widget.title) {
           setState(() {
@@ -262,545 +269,287 @@ class _DetailsPageState extends State<DetailsPage> {
       });
     }
   }
-
-
-
-
+  void _handlePopInvoked(bool didPop, String result) {
+    print('onPopInvokedWithResult triggered: didPop=$didPop, result=$result');
+  }
 
   @override
   void dispose() {
+    super.dispose();
     player.dispose();
     _scrollController.dispose();
-
-    if (_isInterstitialAdReady && random == 2) {
-      _interstitialAd?.show();
-    }
     bottomBanner.dispose();
-    //player.dispose();
+
     OrientationHelper()
         .setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-    super.dispose();
+    _interstitialAd?.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+
+    return PopScope(
+      canPop: true, // Allow pop only if no unsaved changes
+      onPopInvoked: (bool didPop) {
+
+        if (didPop) {
+          if (_isInterstitialAdReady && random == 1) {
+            _interstitialAd?.show();
+          }    return;
+        }
+
+
+      },
       child: OrientationBuilder(
         builder: (context, orientation) {
-          return orientation == Orientation.portrait
-              ? Scaffold(
-                  backgroundColor: Colors.black87,
-                  appBar: AppBar(
-                    backgroundColor: Colors.black87,
-                    leading: Container(),
-                    centerTitle: true,
-                    title: Text(
-                      widget.title!,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontStyle: FontStyle.normal,
-                          fontSize: 14),
-                    ),
-                    actions: [
-                      IconButton(
-                          onPressed: () {
-                            if (favorite) {
-                              setState(() {
-                                favorites.removeWhere(
-                                    (song) => song['title'] == widget.title);
-                                removeFavoriteData(widget.title);
+          return Scaffold(
+              backgroundColor: Colors.black87,
+              appBar: AppBar(
+                backgroundColor: Colors.black87,
+                leading: Container(),
+                centerTitle: true,
+                title: Text(
+                  widget.title!,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontStyle: FontStyle.normal,
+                      fontSize: 14),
+                ),
+                actions: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LyricsViewer(
+                                  title: widget.title,
+                                  verse1: widget.verse1,
+                                  verse2: widget.verse2,
+                                  verse3: widget.verse3,
+                                  verse4: widget.verse4,
+                                  verse5: widget.verse5,
+                                  endingChorus: widget.endingChorus,
+                                  chorus: widget.chorus,
+                                )));
+                      },
+                      icon: const Icon(
+                        Icons.slideshow,
+                        color: Colors.white,
+                      )),
+                  IconButton(
+                      onPressed: () {
+                        if (favorite) {
+                          setState(() {
+                            favorites.removeWhere(
+                                (song) => song['title'] == widget.title);
+                            removeFavoriteData(widget.title);
 
-                                favorite = false;
-                              });
-                            } else {
-                              setState(() {
-                                addFavoriteData({
-                                  'title': widget.title,
-                                  'chord': widget.chord,
-                                  'composer': widget.composer,
-                                  'singer': widget.singer,
-                                  'verse 1': widget.verse1,
-                                  'verse 2': widget.verse2,
-                                  'verse 3': widget.verse3,
-                                  'verse 4': widget.verse4,
-                                  'verse 5': widget.verse5,
-                                  'chorus': widget.chorus,
-                                  'ending chorus': widget.endingChorus
-                                });
-                                 favorites.add({
-                                  'title': widget.title,
-                                  'chord': widget.chord,
-                                  'composer': widget.composer,
-                                  'singer': widget.singer,
-                                  'verse 1': widget.verse1,
-                                  'verse 2': widget.verse2,
-                                  'verse 3': widget.verse3,
-                                  'verse 4': widget.verse4,
-                                  'verse 5': widget.verse5,
-                                  'chorus': widget.chorus,
-                                  'ending chorus': widget.endingChorus
-                                });
+                            favorite = false;
+                          });
+                        } else {
+                          setState(() {
+                            addFavoriteData({
+                              'title': widget.title,
+                              'chord': widget.chord,
+                              'composer': widget.composer,
+                              'singer': widget.singer,
+                              'verse 1': widget.verse1,
+                              'verse 2': widget.verse2,
+                              'verse 3': widget.verse3,
+                              'verse 4': widget.verse4,
+                              'verse 5': widget.verse5,
+                              'chorus': widget.chorus,
+                              'ending chorus': widget.endingChorus
+                            });
+                            favorites.add({
+                              'title': widget.title,
+                              'chord': widget.chord,
+                              'composer': widget.composer,
+                              'singer': widget.singer,
+                              'verse 1': widget.verse1,
+                              'verse 2': widget.verse2,
+                              'verse 3': widget.verse3,
+                              'verse 4': widget.verse4,
+                              'verse 5': widget.verse5,
+                              'chorus': widget.chorus,
+                              'ending chorus': widget.endingChorus
+                            });
 
-                                favorite = true;
-                              });
-                            }
-                          },
-                          icon: favorite
-                              ? const Icon(
-                                  Icons.favorite,
-                                  color: Colors.red,
-                                )
-                              : const Icon(
-                                  Icons.favorite_border,
-                                  color: Colors.white,
-                                )),
-                    ],
-                  ),
-                  bottomSheet: isAdsLoading
+                            favorite = true;
+                          });
+                        }
+                      },
+                      icon: favorite
+                          ? const Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                            )
+                          : const Icon(
+                              Icons.favorite_border,
+                              color: Colors.white,
+                            )),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: alreadyAxist ? Size.fromHeight(20) : Size.zero,
+                  child: alreadyAxist
                       ? Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          height: AdSize.banner.height.toDouble(),
-                          width: MediaQuery.of(context).size.width,
-                          child: AdWidget(
-                            ad: bottomBanner,
-                          ))
-                      : Container(
-                          height: 1,
-                        ),
-                  body: SlidingUpPanel(
-                      color: Colors.transparent,
-                      body: SingleChildScrollView(
-                        controller: _scrollController,
-                        child: GestureDetector(
-                          onDoubleTap: () {
-                            if (fontSiZ == 30) {
-                              setState(() {
-                                fontSiZ = 14;
-                              });
-                            } else {
-                              fontSiZ = fontSiZ + 4;
-                              setState(() {});
-                            }
-                          },
+                          height: 20,
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Row(
                               children: [
-                                widget.composer == null
-                                    ? Container()
-                                    : Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: AutoSizeText(
-                                          'Phan : ${widget.composer}',
-                                          style: const TextStyle(
-                                              letterSpacing: 2,
-                                              color: Colors.white,
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                widget.singer == null
-                                    ? Container()
-                                    : Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: AutoSizeText(
-                                          'Sa      : ${widget.singer}',
-                                          style: const TextStyle(
-                                              letterSpacing: 1,
-                                              color: Colors.white,
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                const SizedBox(
-                                  height: 10,
+                                Text(currentpostlabel.toString()),
+                                Expanded(
+                                  child: Slider(
+                                    activeColor: Colors.red,
+                                    inactiveColor: Colors.grey,
+                                    value: double.parse(currentpos.toString()),
+                                    min: 0,
+                                    max: double.parse(maxduration.toString()),
+                                    divisions: maxduration,
+                                    label: currentpostlabel,
+                                    onChanged: (value) async {
+                                      int seekval = value.round();
+                                      player.seek(
+                                          Duration(milliseconds: seekval));
+                                      setState(() {
+                                        currentpos = seekval;
+                                      });
+                                    },
+                                  ),
                                 ),
-                                LyricsWithChord(
-                                  vpadding:
-                                      MediaQuery.of(context).size.width ~/ 4,
-                                  cpadding:
-                                      MediaQuery.of(context).size.width ~/ 3,
-                                  verse: widget.verse1??'',
-                                  chorus: widget.chorus??'',
-                                  ending: widget.endingChorus??'',
-                                  showChord: _isExpanded,
-                                  scrollSpeed: transpose,
-                                  fontSize: fontSiZ,
-                                ),
-
-                                LyricsWithChord(
-                                  vpadding:
-                                      MediaQuery.of(context).size.width ~/ 4,
-                                  cpadding:
-                                      MediaQuery.of(context).size.width ~/ 3,
-                                  verse: widget.verse2??'',
-                                  chorus:  widget.chorus??'',
-                                  ending: widget.endingChorus??'',
-                                  showChord: _isExpanded,
-                                  scrollSpeed: transpose,
-                                  fontSize: fontSiZ,
-                                ),
-
-                                LyricsWithChord(
-                                  vpadding:
-                                      MediaQuery.of(context).size.width ~/ 4,
-                                  cpadding:
-                                      MediaQuery.of(context).size.width ~/ 3,
-                                  verse: widget.verse3??'',
-                                  chorus: widget.chorus??'',
-                                  ending: widget.endingChorus??'',
-                                  showChord: _isExpanded,
-                                  scrollSpeed: transpose,
-                                  fontSize: fontSiZ,
-                                ),
-                                LyricsWithChord(
-                                  vpadding:
-                                      MediaQuery.of(context).size.width ~/ 4,
-                                  cpadding:
-                                      MediaQuery.of(context).size.width ~/ 3,
-                                  verse: widget.verse4??'',
-                                  chorus: widget.chorus??'',
-                                  ending: widget.endingChorus??'',
-                                  showChord: _isExpanded,
-                                  scrollSpeed: transpose,
-                                  fontSize: fontSiZ,
-                                ),
-
-                                Container(
-                                  margin: const EdgeInsets.only(left: 10.0),
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: widget.endingChorus == null
-                                      ? Container()
-                                      : LyricsRenderer(
-                                          showChord: _isExpanded,
-                                          lyrics: widget.endingChorus??'',
-                                          textStyle:   TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: fontSiZ ,
-                                              fontStyle: FontStyle.normal),
-                                          chordStyle: const TextStyle(
-                                              color: Colors.green),
-                                          lineHeight: 0,
-                                          widgetPadding: 100,
-                                          transposeIncrement: transpose,
-                                          onTapChord: () {},
-                                        ),
-                                ),
-
-                                //soundtrack
-                                widget.songtrack == ''
-                                    ? const SizedBox()
-                                    : alreadyAxist
-                                        ? Container(
-                                            height: 100,
-                                            decoration: const BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(60),
-                                                    topLeft:
-                                                        Radius.circular(20))),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  height: 20,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 8.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(currentpostlabel
-                                                          .toString()),
-                                                      Expanded(
-                                                        child: Slider(
-                                                          activeColor:
-                                                              Colors.red,
-                                                          inactiveColor:
-                                                              Colors.black,
-                                                          value: double.parse(
-                                                              currentpos
-                                                                  .toString()),
-                                                          min: 0,
-                                                          max: double.parse(
-                                                              maxduration
-                                                                  .toString()),
-                                                          divisions:
-                                                              maxduration,
-                                                          label:
-                                                              currentpostlabel,
-                                                          onChanged:
-                                                              (value) async {
-                                                            int seekval =
-                                                                value.round();
-                                                            player.seek(Duration(
-                                                                milliseconds:
-                                                                    seekval));
-                                                            setState(() {
-                                                              currentpos =
-                                                                  seekval;
-                                                            });
-                                                          },
-                                                        ),
-                                                      ),
-                                                      Text(maxDurationlabel
-                                                          .toString()),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Container(
-                                                  // height: 40,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 8.0),
-
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      IconButton(
-                                                        onPressed: () {
-                                                          player.seek(Duration(
-                                                              milliseconds:
-                                                                  currentpos -
-                                                                      10000));
-                                                        },
-                                                        icon: const CircleAvatar(
-                                                            child: Icon(Icons
-                                                                .fast_rewind)),
-                                                      ),
-                                                      IconButton(
-                                                        onPressed: () {
-                                                          if (!isplaying) {
-                                                            player.play(
-                                                                DeviceFileSource(
-                                                                    urlPath));
-                                                            setState(() {
-                                                              isplaying = true;
-                                                              audioplayed =
-                                                                  true;
-                                                            });
-                                                          } else {
-                                                            player.pause();
-                                                            setState(() {
-                                                              isplaying = false;
-                                                              audioplayed =
-                                                                  false;
-                                                            });
-                                                          }
-                                                        },
-                                                        icon: CircleAvatar(
-                                                            child: Icon(isplaying
-                                                                ? Icons.pause
-                                                                : Icons
-                                                                    .play_arrow)),
-                                                      ),
-                                                      IconButton(
-                                                        onPressed: () {
-                                                          player.seek(Duration(
-                                                              milliseconds:
-                                                                  currentpos +
-                                                                      10000));
-                                                        },
-                                                        icon:
-                                                            const CircleAvatar(
-                                                                child: Icon(
-                                                          Icons.fast_forward,
-                                                        )),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : Center(
-                                            child: TextButton(
-                                                onPressed: () async {
-                                                  //  await downloadFile('https://drive.google.com/file/d/1CUnf8WlgtVQqAztNMKl-NTY09YaZXSOI/view?usp=share_link', widget.title+widget.singer);
-
-                                                  await downloadFile(
-                                                      widget.songtrack??"",
-                                                      widget.title! +
-                                                          widget.singer!);
-                                                },
-                                                child: Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                          color: Colors.cyan,
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          10))),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                                  child: downloading
-                                                      ? Column(
-                                                          children: [
-                                                            const SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                            LinearProgressIndicator(
-                                                              value: progress,
-                                                              minHeight: 12,
-                                                            ),
-                                                            //    const Text('Downloading..',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-                                                            const SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                            Text(
-                                                              '${(progress * 100).floor()}%',
-                                                              style: const TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                            ),
-                                                            const SizedBox(
-                                                              height: 20,
-                                                            ),
-                                                          ],
-                                                        )
-                                                      : const Text(
-                                                          'Download song track',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500),
-                                                        ),
-                                                )),
-                                          ),
-
-                                const SizedBox(
-                                  height: 200,
-                                )
+                                Text(maxDurationlabel.toString()),
                               ],
                             ),
                           ),
+                        )
+                      : SizedBox(),
+                ),
+              ),
+              bottomSheet: isAdsLoading
+                  ? Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      height: AdSize.banner.height.toDouble(),
+                      width: MediaQuery.of(context).size.width,
+                      child: AdWidget(
+                        ad: bottomBanner,
+                      ))
+                  : Container(
+                      height: 1,
+                    ),
+              floatingActionButton: _isScrolling
+                  ? FloatingActionButton(
+                backgroundColor: Colors.transparent,
+                onPressed: _toggleAutoScroll,
+                child: const Icon(
+                  Icons.arrow_downward,
+                  color: Colors.green,
+                ),
+              )
+                  : alreadyAxist
+                  ? Card(
+                color: Colors.red.shade900,
+                child: IconButton(
+                  onPressed: () async {
+                    if (!isplaying) {
+                      await player.setSourceDeviceFile(urlPath);
+                      await player.resume();
+
+                      setState(() {
+                        isplaying = true;
+                        audioplayed = true;
+                      });
+                    } else {
+                      player.pause();
+                      setState(() {
+                        isplaying = false;
+                        audioplayed = false;
+                      });
+                    }
+                  },
+                  icon: Icon(
+                    isplaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              )
+                  : downloading
+                  ? SizedBox(
+                height: 60,
+                width: 100,
+                child: Card(
+                  color: Colors.red.shade900,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 4,
+                          backgroundColor: Colors.grey,
+                          color: Colors.green,
+                          value: (progress * 100) > 5
+                              ? progress
+                              : 0.10, // 0.0 to 1.0
                         ),
                       ),
-                      panelBuilder: (controller) {
-                        return widget.chord == null
-                            ? const SizedBox()
-                            : Container(
-                                decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(12))),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  // padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                  children: [
-                                    const SizedBox(
-                                      height: 6,
-                                    ),
-                                    Center(
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                            color: Colors.grey,
-                                            borderRadius:
-                                                BorderRadius.all(Radius.zero)),
-                                        height: 5,
-                                        width: 30,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Checkbox(
-                                              value: _chordChecked,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _chordChecked = value!;
-                                                  _isExpanded = !_isExpanded;
-                                                });
-                                              },
-                                            ),
-                                            const Text('Chord'),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                                padding:
-                                                    const EdgeInsets.all(3),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    transpose--;
-                                                  });
-                                                },
-                                                icon: const Icon(Icons.remove)),
-                                            Text(transpose.toString()),
-                                            IconButton(
-                                                padding:
-                                                    const EdgeInsets.all(3),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    transpose++;
-                                                  });
-                                                },
-                                                icon: const Icon(Icons.add)),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                      }))
-              : Scaffold(
-                  backgroundColor: Colors.black,
+
+                      // Text inside the circle
+                      Center(
+                        child: Text(
+                          "    ${(progress * 100).toStringAsFixed(0)}%",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+                  : widget.songtrack == ''
+                  ? const SizedBox()
+                  : Card(
+                color: Colors.red.shade900,
+                child: TextButton.icon(
+                    onPressed: () async {
+                      await downloadFile(
+                          widget.songtrack!,
+                          '${widget.title! + widget.singer!}.mp3');
+                    },
+                    label: const Text(
+                      'Track',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    icon: const Icon(
+                      Icons.cloud_download,
+                      color: Colors.green,
+                    )),
+              ),
+
+              body: SlidingUpPanel(
+                  color: Colors.transparent,
                   body: SingleChildScrollView(
                     controller: _scrollController,
                     child: GestureDetector(
-                      onDoubleTap: () {
-                        if (fontSiZ == 30) {
-                          setState(() {
-                            fontSiZ = 14;
-                          });
-                        } else {
-                          fontSiZ = fontSiZ + 4;
-                          setState(() {});
-                        }
-                      },
+                      onLongPress: () => settings(
+                        context,
+                      ),
+                      onDoubleTap: () => _toggleAutoScroll(),
                       child: Container(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Center(
-                              child: Container(
-                                padding: const EdgeInsets.only(top: 5),
-                                color: Colors.blueGrey.shade100,
-                                child: AutoSizeText(
-                                  '  ${widget.title}   ',
-                                  style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontStyle: FontStyle.normal,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 2),
-                                ),
-                              ),
-                            ),
                             widget.composer == null
                                 ? Container()
                                 : Padding(
@@ -809,6 +558,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                       'Phan : ${widget.composer}',
                                       style: const TextStyle(
                                           letterSpacing: 2,
+                                          color: Colors.white,
                                           fontStyle: FontStyle.normal,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -821,50 +571,55 @@ class _DetailsPageState extends State<DetailsPage> {
                                       'Sa      : ${widget.singer}',
                                       style: const TextStyle(
                                           letterSpacing: 1,
+                                          color: Colors.white,
                                           fontStyle: FontStyle.normal,
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            LyricsWithChord(
+                              vpadding: MediaQuery.of(context).size.width ~/ 4,
+                              cpadding: MediaQuery.of(context).size.width ~/ 3,
+                              verse: widget.verse1 ?? '',
+                              chorus: widget.chorus ?? '',
+                              ending: widget.endingChorus ?? '',
+                              showChord: _isExpanded,
+                              scrollSpeed: transpose,
+                              fontSize: fontSize,
+                            ),
 
                             LyricsWithChord(
-                              vpadding: MediaQuery.of(context).size.width ~/ 6,
-                              cpadding: MediaQuery.of(context).size.width ~/ 5,
-                              verse: widget.verse1??'',
-                              chorus: widget.chorus??'',
-                              ending: widget.endingChorus??'',
+                              vpadding: MediaQuery.of(context).size.width ~/ 4,
+                              cpadding: MediaQuery.of(context).size.width ~/ 3,
+                              verse: widget.verse2 ?? '',
+                              chorus: widget.chorus ?? '',
+                              ending: widget.endingChorus ?? '',
                               showChord: _isExpanded,
-                              fontSize: fontSiZ,
                               scrollSpeed: transpose,
+                              fontSize: fontSize,
+                            ),
+
+                            LyricsWithChord(
+                              vpadding: MediaQuery.of(context).size.width ~/ 4,
+                              cpadding: MediaQuery.of(context).size.width ~/ 3,
+                              verse: widget.verse3 ?? '',
+                              chorus: widget.chorus ?? '',
+                              ending: widget.endingChorus ?? '',
+                              showChord: _isExpanded,
+                              scrollSpeed: transpose,
+                              fontSize: fontSize,
                             ),
                             LyricsWithChord(
-                              vpadding: MediaQuery.of(context).size.width ~/ 6,
-                              cpadding: MediaQuery.of(context).size.width ~/ 5,
-                              verse: widget.verse2??'',
-                              chorus: widget.chorus??'',
-                              fontSize: fontSiZ,
-                              ending: widget.endingChorus??'',
+                              vpadding: MediaQuery.of(context).size.width ~/ 4,
+                              cpadding: MediaQuery.of(context).size.width ~/ 3,
+                              verse: widget.verse4 ?? '',
+                              chorus: widget.chorus ?? '',
+                              ending: widget.endingChorus ?? '',
                               showChord: _isExpanded,
                               scrollSpeed: transpose,
-                            ),
-                            LyricsWithChord(
-                              vpadding: MediaQuery.of(context).size.width ~/ 6,
-                              cpadding: MediaQuery.of(context).size.width ~/ 5,
-                              verse: widget.verse3??'',
-                              chorus: widget.chorus??'',
-                              ending: widget.endingChorus??'',
-                              showChord: _isExpanded,
-                              fontSize: fontSiZ,
-                              scrollSpeed: transpose,
-                            ),
-                            LyricsWithChord(
-                              vpadding: MediaQuery.of(context).size.width ~/ 6,
-                              cpadding: MediaQuery.of(context).size.width ~/ 5,
-                              verse: widget.verse4??'',
-                              chorus: widget.chorus??'',
-                              fontSize: fontSiZ,
-                              ending: widget.endingChorus??'',
-                              showChord: _isExpanded,
-                              scrollSpeed: transpose,
+                              fontSize: fontSize,
                             ),
 
                             Container(
@@ -872,27 +627,25 @@ class _DetailsPageState extends State<DetailsPage> {
                               padding: const EdgeInsets.all(6.0),
                               child: widget.endingChorus == null
                                   ? Container()
-                                  : Builder(builder: (context) {
-                                      return LyricsRenderer(
-                                        showChord: _isExpanded,
-                                        lyrics: widget.endingChorus??'',
-                                        textStyle:   TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: fontSiZ ,
-                                            fontStyle: FontStyle.normal),
-                                        chordStyle: const TextStyle(
-                                            color: Colors.green),
-                                        lineHeight: 0,
-                                        widgetPadding: 100,
-                                        transposeIncrement: transpose,
-                                        onTapChord: () {},
-                                      );
-                                    }),
+                                  : LyricsRenderer(
+                                      showChord: _isExpanded,
+                                      lyrics: widget.endingChorus ?? '',
+                                      textStyle: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: fontSize,
+                                          fontStyle: FontStyle.normal),
+                                      chordStyle:
+                                          const TextStyle(color: Colors.green),
+                                      lineHeight: 0,
+                                      widgetPadding: 100,
+                                      transposeIncrement: transpose,
+                                      onTapChord: () {},
+                                    ),
                             ),
 
                             //soundtrack
-                            widget.songtrack == null
-                                ? Container()
+                            /*         widget.songtrack == '' || widget.songtrack == null
+                                ? const SizedBox()
                                 : alreadyAxist
                                     ? Container(
                                         height: 100,
@@ -930,17 +683,14 @@ class _DetailsPageState extends State<DetailsPage> {
                                                       divisions: maxduration,
                                                       label: currentpostlabel,
                                                       onChanged: (value) async {
-                                                        /*
                                                         int seekval =
                                                             value.round();
                                                         player.seek(Duration(
                                                             milliseconds:
                                                                 seekval));
                                                         setState(() {
-                                                          currentpos =
-                                                              seekval;
+                                                          currentpos = seekval;
                                                         });
-                                                        */
                                                       },
                                                     ),
                                                   ),
@@ -962,12 +712,10 @@ class _DetailsPageState extends State<DetailsPage> {
                                                 children: [
                                                   IconButton(
                                                     onPressed: () {
-                                                      /*
                                                       player.seek(Duration(
                                                           milliseconds:
                                                               currentpos -
                                                                   10000));
-                                                      */
                                                     },
                                                     icon: const CircleAvatar(
                                                         child: Icon(
@@ -975,7 +723,6 @@ class _DetailsPageState extends State<DetailsPage> {
                                                   ),
                                                   IconButton(
                                                     onPressed: () {
-                                                      /*
                                                       if (!isplaying) {
                                                         player.play(
                                                             DeviceFileSource(
@@ -990,7 +737,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                                           isplaying = false;
                                                           audioplayed = false;
                                                         });
-                                                      }*/
+                                                      }
                                                     },
                                                     icon: CircleAvatar(
                                                         child: Icon(isplaying
@@ -1000,12 +747,10 @@ class _DetailsPageState extends State<DetailsPage> {
                                                   ),
                                                   IconButton(
                                                     onPressed: () {
-                                                      /*
                                                       player.seek(Duration(
                                                           milliseconds:
                                                               currentpos +
                                                                   10000));
-                                                      */
                                                     },
                                                     icon: const CircleAvatar(
                                                         child: Icon(
@@ -1021,13 +766,12 @@ class _DetailsPageState extends State<DetailsPage> {
                                     : Center(
                                         child: TextButton(
                                             onPressed: () async {
-                                              /*
-                                              await downloadFile(
-                                                  widget.songtrack,
-                                                  widget.title +
-                                                      widget.singer);
-                                              */
                                               //  await downloadFile('https://drive.google.com/file/d/1CUnf8WlgtVQqAztNMKl-NTY09YaZXSOI/view?usp=share_link', widget.title+widget.singer);
+
+                                              await downloadFile(
+                                                  widget.songtrack ?? "",
+                                                  widget.title! +
+                                                      widget.singer!);
                                             },
                                             child: Container(
                                               decoration: const BoxDecoration(
@@ -1076,18 +820,222 @@ class _DetailsPageState extends State<DetailsPage> {
                                                     ),
                                             )),
                                       ),
-
+      */
                             const SizedBox(
-                              height: 100,
+                              height: 400,
                             )
                           ],
                         ),
                       ),
                     ),
                   ),
-                );
+                  panelBuilder: (controller) {
+                    return widget.chord == false
+                        ? const SizedBox()
+                    //
+                        : Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.black87,
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(12))),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        // padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: _chordChecked,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _chordChecked = value!;
+                                        _isExpanded = !_isExpanded;
+                                      });
+                                    },
+                                  ),
+                                  const Text('chord',
+                                      style:
+                                      TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                      padding: const EdgeInsets.all(2),
+                                      onPressed: () {
+                                        setState(() {
+                                          transpose--;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.remove)),
+                                  Text(
+                                    transpose.toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white),
+                                  ),
+                                  IconButton(
+                                      padding: const EdgeInsets.all(2),
+                                      onPressed: () {
+                                        setState(() {
+                                          transpose++;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.add)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }));
         },
       ),
     );
+  }
+
+  void settings(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              scrollable: true,
+              title: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Settings', style: TextStyle(fontSize: 16)),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Scroll speed: ${speedScroll.toInt()}',
+                      style: TextStyle(fontSize: 12)),
+                  SizedBox(height: 6),
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 1,
+                      thumbShape:
+                          RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                      overlayShape:
+                          RoundSliderOverlayShape(overlayRadius: 12.0),
+                    ),
+                    child: Slider(
+                      value: speedScroll,
+                      min: 1,
+                      max: 20,
+                      divisions: 19,
+                      label: speedScroll.toInt().toString(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          speedScroll = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                          icon: Icon(Icons.remove, size: 16),
+                          onPressed: () {
+                            if (fontSize > 12) {
+                              setState(() {
+                                fontSize--;
+                              });
+                            }
+                          }),
+                      Text(
+                        'FontSize',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      IconButton(
+                          icon: Icon(Icons.add, size: 16),
+                          onPressed: () {
+                            if (fontSize < 36) {
+                              setState(() {
+                                fontSize++;
+                              });
+                            }
+                            if (fontSize == 36) {
+                              setState(() {
+                                fontSize = 12;
+                              });
+                            }
+                          }),
+                    ],
+                  ),
+                  Divider(),
+                  SizedBox(height: 12),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Check if widget is still mounted before calling setState
+                    if (mounted) {
+                      setState(() {});
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _toggleAutoScroll() {
+    if (_isScrolling) {
+      _scrollController.jumpTo(_scrollController.offset);
+      if (mounted) {
+        // Check if widget is still mounted
+        setState(() {
+          _isScrolling = false;
+        });
+      }
+    } else {
+      if (!_scrollController.hasClients) return;
+      if (mounted) {
+        // Check if widget is still mounted
+        setState(() {
+          _isScrolling = true;
+        });
+      }
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      _scrollController
+          .animateTo(
+        maxScroll,
+        duration: Duration(seconds: (maxScroll / speedScroll).round()),
+        curve: Curves.linear,
+      )
+          .whenComplete(() {
+        // IMPORTANT: Check if widget is still mounted before calling setState
+        if (mounted) {
+          setState(() {
+            _isScrolling = false;
+          });
+        }
+      });
+    }
   }
 }

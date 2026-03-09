@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "853152976119",
     "project_id": "music-lyrics-ed459",
-    "storage_bucket": "music-lyrics-ed459.appspot.com"
+    "storage_bucket": "music-lyrics-ed459.firebasestorage.app"
   },
   "client": [
     {
@@ -29,6 +29,13 @@
             {
               "client_id": "853152976119-pjqfg0183692dffg4t1mngonbi2cmpiv.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "853152976119-0k7no1o0ecim1j38nbth7722e53sijev.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "chinplus.info.laihlalyrics.laihlaLyrics"
+              }
             }
           ]
         }

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class JsonHelper {
-   loadKhrihfaHlaBu() async {
+   Future loadKhrihFaHlaBu() async {
     String jsonString = await rootBundle.loadString('assets/khrihfahlabu.json');
     final jsonData = json.decode(jsonString);
     return jsonData;
   }
 
-  loadChawngHlang() async {
+  Future loadChawngHlang() async {
     String jsonString = await rootBundle.loadString('assets/chawnghlang.json');
     final jsonData = json.decode(jsonString);
     return jsonData;
@@ -70,7 +70,7 @@ class ChDetail extends StatefulWidget {
   final String? z10;
 
   const ChDetail({
-    Key? key,
+    super.key,
     this.h1,
     this.h2,
     this.h3,
@@ -92,7 +92,7 @@ class ChDetail extends StatefulWidget {
     this.z9,
     this.z10,
     this.tittle,
-  }) : super(key: key);
+  });
 
   @override
   State<ChDetail> createState() => _ChDetailState();

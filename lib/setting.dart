@@ -128,7 +128,7 @@ class _SettingState extends State<Setting> {
     }).toList();
   }
 
-  showDialogBox() => showCupertinoDialog<String>(
+  Future<String?> showDialogBox() => showCupertinoDialog<String>(
     context: context,
     builder: (BuildContext context) => CupertinoAlertDialog(
       title: const Center(

@@ -15,12 +15,11 @@ class ProfileScreen extends StatefulWidget {
   final List<dynamic> songs;
 
   const ProfileScreen(
-      {Key? key,
+      {super.key,
       required this.username,
       required this.imageUrl,
       required this.id,
-      required this.songs})
-      : super(key: key);
+      required this.songs});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -49,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (kDebugMode) {}
     try {
       final response = await http.get(
-        Uri.parse('https://itrungrul.xyz/users/profile/${widget.id}'),
+        Uri.parse('https://laihlalyrics.itrungrul.com/users/profile/${widget.id}'),
       );
 
       if (response.statusCode == 200) {
@@ -186,6 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       trailing: GestureDetector(
           onTap: () {
             Get.to(() => ChatPage(
+              songs: widget.songs,
                   userId: userBox.get('id'),
                   chatPartnerId: widget.id,
                   chatPartnerName: widget.username,

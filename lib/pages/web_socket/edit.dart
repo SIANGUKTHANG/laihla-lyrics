@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -46,7 +45,7 @@ class UpdateSongPageState extends State<UpdateSongPage> {
   late String songtrack;
 
 
-  getUser()async{
+  Future<void> getUser()async{
     username = await userBox.get('username');
     id = await userBox.get('id');
 
@@ -103,7 +102,7 @@ class UpdateSongPageState extends State<UpdateSongPage> {
 
       final response = await http.put(
         Uri.parse(
-            'https://itrungrul.xyz/api/songs/${widget.song["_id"]}'),
+            'https://laihlalyrics.itrungrul.com/api/songs/${widget.song["_id"]}'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(updatedSong),
       );
@@ -189,12 +188,7 @@ class UpdateSongPageState extends State<UpdateSongPage> {
                       child: Column(
                         children: [
                           Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border:
-                                  Border.all(color: Colors.purple.withOpacity(1)),
-                            ),
+
                             padding: const EdgeInsets.symmetric(horizontal: 20.0),
                             child: DropdownButtonFormField<String>(
                               focusColor: Colors.white,
@@ -302,9 +296,8 @@ class UpdateSongPageState extends State<UpdateSongPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.5)),
+              borderRadius: BorderRadius.circular(12),
+
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: TextFormField(
@@ -342,9 +335,9 @@ Widget _buildBlurCard({required Widget child}) {
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+
         ),
         padding: const EdgeInsets.all(16),
         child: child,
